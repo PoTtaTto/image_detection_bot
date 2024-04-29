@@ -9,7 +9,7 @@ from pathlib import Path
 import config as cf
 
 
-def detect_and_draw_boxes(image_path: Path, scale_factor: float) -> np.ndarray:
+def detect_and_draw_boxes(image_path: Path, scale_factor: float, name: str = 'blank.jpg') -> Path:
     """
     Detect objects in an image and draw bounding boxes with class names around detected objects.
 
@@ -48,7 +48,10 @@ def detect_and_draw_boxes(image_path: Path, scale_factor: float) -> np.ndarray:
             cv2.putText(image, class_name, (int(box_x), int(box_y - 5)), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
     # Return the annotated image
-    return image
+
+    result_path = cf.DATA_PATH / 'images' / name
+    cv2.imwrite(filename=str(result_path), img=image)
+    return result_path
 
 
 def __init_model_vars() -> tuple[list[str], np.ndarray, cv2.dnn.Net]:
@@ -58,14 +61,14 @@ def __init_model_vars() -> tuple[list[str], np.ndarray, cv2.dnn.Net]:
     Returns:
     - A tuple containing the class names, colors for each class, and the cv2 deep neural network model.
     """
-    with open(str(cf.DATA_PATH / 'object_detection_classes_coco.txt'), 'r') as f:
+    with open(str(cf.DATA_PATH / 'model' / 'object_detection_classes_coco.txt'), 'r') as f:
         class_names = f.read().split('\n')
 
     colors = np.random.uniform(0, 255, size=(len(class_names), 3))
 
     model = cv2.dnn.readNet(
-        model=str(cf.DATA_PATH / 'frozen_inference_graph.pb'),
-        config=str(cf.DATA_PATH / 'ssd_mobilenet_v2_coco_2018_03_29.pbtxt'),
+        model=str(cf.DATA_PATH / 'model' / 'frozen_inference_graph.pb'),
+        config=str(cf.DATA_PATH / 'model' / 'ssd_mobilenet_v2_coco_2018_03_29.pbtxt'),
         framework='TensorFlow'
     )
 

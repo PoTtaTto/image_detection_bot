@@ -5,8 +5,6 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
 # Project
-import config as cf
-from database import db
 from logger import bot_logger
 from resources import strs
 
@@ -32,7 +30,7 @@ async def handle_start_command(message: Message, state: FSMContext):
     """
     bot_logger.info(f'Handling command /start from user {message.chat.id}')
 
-    await message.answer(text='start')
+    await message.answer(text=strs.start_msg)
 
 
 @basic_router.message(Command('help'))
@@ -46,4 +44,4 @@ async def handle_help_command(message: Message, state: FSMContext):
     """
     bot_logger.info(f'Handling command /help from user {message.chat.id}')
 
-    await message.answer(text='help')
+    await message.answer(text=strs.help_msg)
