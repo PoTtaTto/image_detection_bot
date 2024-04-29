@@ -9,7 +9,7 @@ from pathlib import Path
 import config as cf
 
 
-def detect_and_draw_boxes(image_path: Path, scale_factor: float, name: str = 'blank.jpg') -> Path:
+async def detect_and_draw_boxes(image_path: Path, scale_factor: float, name: str = 'blank.jpg') -> Path:
     """
     Detect objects in an image and draw bounding boxes with class names around detected objects.
 

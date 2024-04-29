@@ -7,6 +7,9 @@ COPY . /usr/src/app/image_detection_bot/
 # Set the working directory to /usr/src/app/image_detection_bot/
 WORKDIR /usr/src/app/image_detection_bot/
 
+# Install extra dependencies for opencv
+RUN apt update; apt install -y libgl1
+
 # Install the Python dependencies specified in the requirements.txt file
 # Use cache for pip to speed up the process
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r /usr/src/app/image_detection_bot/requirements.txt
