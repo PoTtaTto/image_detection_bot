@@ -3,10 +3,12 @@ from dotenv import load_dotenv
 
 # Standard
 import os
+from pathlib import Path
 
 load_dotenv('./.env')  # Load environment variables from .env
 
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE = Path(__file__).resolve().parent
+DATA_PATH = BASE / 'data'
 
 # Define project directories
 project = {
