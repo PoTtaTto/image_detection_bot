@@ -1,0 +1,49 @@
+# Third-party
+from aiogram import Router
+from aiogram.filters import Command
+from aiogram.types import Message
+from aiogram.fsm.context import FSMContext
+
+# Project
+import config as cf
+from database import db
+from logger import bot_logger
+from resources import strs
+
+# __router__ !DO NOT DELETE!
+basic_router = Router()
+
+
+# __states__ !DO NOT DELETE!
+
+
+# __buttons__ !DO NOT DELETE!
+
+
+# __chat__ !DO NOT DELETE!
+@basic_router.message(Command('start'))
+async def handle_start_command(message: Message, state: FSMContext):
+    """
+    Handle the /start command from the user.
+
+    Args:
+        message (Message): The message object sent by the user.
+        state (FSMContext): The state context.
+    """
+    bot_logger.info(f'Handling command /start from user {message.chat.id}')
+
+    await message.answer(text='start')
+
+
+@basic_router.message(Command('help'))
+async def handle_help_command(message: Message, state: FSMContext):
+    """
+    Handle the /help command from the user.
+
+    Args:
+        message (Message): The message object sent by the user.
+        state (FSMContext): The state context.
+    """
+    bot_logger.info(f'Handling command /help from user {message.chat.id}')
+
+    await message.answer(text='help')
