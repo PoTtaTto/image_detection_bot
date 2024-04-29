@@ -8,7 +8,6 @@ import asyncio
 from bot import bot, dispatcher
 from handlers import all_routers
 from logger import bot_logger
-from server import start_panel
 
 dispatcher.include_routers(*all_routers)
 
@@ -34,7 +33,6 @@ async def run_app():
     """
     await asyncio.gather(
         start_bot(),
-        start_panel()
     )
 
 

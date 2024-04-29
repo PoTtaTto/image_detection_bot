@@ -3,12 +3,23 @@ from dotenv import load_dotenv
 
 # Standard
 import os
-from pathlib import Path
+import pathlib
 
 load_dotenv('./.env')  # Load environment variables from .env
 
-BASE = Path(__file__).resolve().parent
+BASE = pathlib.Path(__file__).resolve().parent
 DATA_PATH = BASE / 'data'
+
+# Create data folder if not exists
+if not DATA_PATH.exists():
+    DATA_PATH.mkdir()
+    (DATA_PATH / 'images').mkdir()
+    (DATA_PATH / 'model').mkdir()
+
+# Create image folder if not exists
+if not (DATA_PATH / 'images').exists():
+    (DATA_PATH / 'images').mkdir()
+
 
 # Define project directories
 project = {
@@ -18,20 +29,4 @@ project = {
 # Define bot configuration
 bot = {
     'token': os.getenv('BOT_TOKEN'),
-}
-
-
-# Define database configuration
-database = {
-    'host': os.getenv('DATABASE_HOST'),
-    'port': os.getenv('DATABASE_PORT'),
-    'user': os.getenv('DATABASE_USER'),
-    'password': os.getenv('DATABASE_PASSWORD'),
-}
-
-# Define server configuration
-server = {
-    'host': os.getenv('PANEL_HOST'),
-    'port': os.getenv('PANEL_PORT'),
-    'secret_key': os.getenv('SECRET_KEY')
 }

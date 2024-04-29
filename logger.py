@@ -89,7 +89,7 @@ def create_log_folder() -> str:
     Returns:
     str: Path of the log folder
     """
-    path = cf.BASE + '/logs'
+    path = cf.BASE / 'logs'
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True)
     return path
@@ -101,11 +101,3 @@ logging_folder = create_log_folder()
 # Logger for the bot
 bot_logger = Logger(name='bot', logging_path=os.path.join(logging_folder, 'bot_log.log'))
 bot_logger.clear_log_file()
-
-# Logger for the database
-database_logger = Logger(name='database', logging_path=os.path.join(logging_folder, 'database_log.log'))
-database_logger.clear_log_file()
-
-# Logger for the server
-server_logger = Logger(name='server', logging_path=os.path.join(logging_folder, 'server_log.log'))
-server_logger.clear_log_file()
