@@ -1,6 +1,7 @@
 # Third-party
 import cv2
 import numpy as np
+import torch
 
 # Standard
 from pathlib import Path
@@ -9,15 +10,18 @@ from pathlib import Path
 import config as cf
 
 
-async def detect_and_draw_boxes(image_path: Path, scale_factor: float, name: str = 'blank.jpg') -> Path:
+async def detect_and_draw_boxes(image_path: Path, scale_factor: float = 1.0, name: str = 'blank.jpg') -> Path:
     """
     Detect objects in an image and draw bounding boxes with class names around detected objects.
 
     Parameters:
     - image_path: The path to the image file.
+    - scale_factor: The factor by which the image size should be increased or decreased.
+    - name: The name of the output image.
 
     Returns:
     - The original image with bounding boxes and class names drawn.
+    - The list of detected labels.
     """
     # Initialize model variables
     class_names, colors, model = __init_model_vars()
@@ -32,12 +36,16 @@ async def detect_and_draw_boxes(image_path: Path, scale_factor: float, name: str
     model.setInput(blob)
     output = model.forward()
 
+    # Initialize an empty list to hold detected labels
+    detected_labels = []
+
     # Loop through the detections
     for detection in output[0, 0, :, :]:
         confidence = detection[2]
         if confidence > .4:
             class_id = detection[1]
             class_name = class_names[int(class_id) - 1]
+            detected_labels.append(class_name)
             color = colors[int(class_id)]
             box_x = detection[3] * image_width
             box_y = detection[4] * image_height
@@ -47,11 +55,10 @@ async def detect_and_draw_boxes(image_path: Path, scale_factor: float, name: str
                           thickness=2)
             cv2.putText(image, class_name, (int(box_x), int(box_y - 5)), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
-    # Return the annotated image
-
+    # Return the annotated image and detected labels
     result_path = cf.DATA_PATH / 'images' / name
     cv2.imwrite(filename=str(result_path), img=image)
-    return result_path
+    return result_path, detected_labels
 
 
 def __init_model_vars() -> tuple[list[str], np.ndarray, cv2.dnn.Net]:
@@ -97,3 +104,45 @@ def __resize_image(image: np.ndarray, scale_factor: float) -> np.ndarray:
 
     resized_image = cv2.resize(image, (new_width, new_height))
     return resized_image
+
+
+def test(loaders: dict, model: cv2.dnn.Net, criterion, use_cuda: bool) -> tuple[float, float]:
+    """
+    Test the trained model on validation and test data.
+
+    Parameters:
+    - loaders: Dictionary containing DataLoader objects with training, validation, and test data.
+    - model: The trained model to be tested.
+    - criterion: Loss function used to evaluate the model.
+    - use_cuda: Boolean flag to indicate if GPU should be used for computations.
+
+    Returns:
+    - A tuple with loss and accuracy of the model.
+    """
+    device = "cuda" if use_cuda and torch.cuda.is_available() else "cpu"
+    model.to(device)
+    model.eval()
+
+    total_loss = 0.0
+    correct_predictions = 0
+    total_samples = 0
+
+    with torch.no_grad():
+        for data in loaders['test']:
+            images, labels = data
+            images, labels = images.to(device), labels.to(device)
+
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+
+            total_loss += loss.item()
+            _, predicted = torch.max(outputs.data, 1)
+            total_samples += labels.size(0)
+            correct_predictions += (predicted == labels).sum().item()
+
+    avg_loss = total_loss / total_samples
+    accuracy = correct_predictions / total_samples * 100
+
+    print(f"Test Loss: {avg_loss:.4f}, Test Accuracy: {accuracy:.2f}%")
+
+    return avg_loss, accuracy

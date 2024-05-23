@@ -64,7 +64,7 @@ async def handle_photo_command(message: Message, state: FSMContext):
     download_path = cf.DATA_PATH / 'images' / f'{file_id}.jpg'
     await __download_image(url=url, destination=download_path)
 
-    result_image_path = await detect_and_draw_boxes(image_path=download_path, scale_factor=1, name=f'result_{file_id}.jpg')
+    result_image_path, _ = await detect_and_draw_boxes(image_path=download_path, scale_factor=1, name=f'result_{file_id}.jpg')
 
     from aiogram.types import FSInputFile
     output_image = FSInputFile(path=result_image_path)
