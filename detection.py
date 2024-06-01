@@ -1,7 +1,6 @@
 # Third-party
 import cv2
 import numpy as np
-import torch
 
 # Standard
 from pathlib import Path
@@ -32,7 +31,7 @@ async def detect_and_draw_boxes(image_path: Path, scale_factor: float = 1.0, nam
     image_height, image_width, _ = image.shape
 
     # Create a blob from the image
-    blob = cv2.dnn.blobFromImage(image=image, size=(300, 300), mean=(104, 117, 123), swapRB=True)
+    blob = cv2.dnn.blobFromImage(image=image, scalefactor=1.0/127.5, size=(300, 300), mean=(127.5, 127.5, 127.5), swapRB=True, crop=False)
     model.setInput(blob)
     output = model.forward()
 
@@ -58,7 +57,9 @@ async def detect_and_draw_boxes(image_path: Path, scale_factor: float = 1.0, nam
     # Return the annotated image and detected labels
     result_path = cf.DATA_PATH / 'images' / name
     cv2.imwrite(filename=str(result_path), img=image)
+    print(f'Detected {len(detected_labels)} objects.')
     return result_path, detected_labels
+
 
 
 def __init_model_vars() -> tuple[list[str], np.ndarray, cv2.dnn.Net]:
@@ -68,14 +69,14 @@ def __init_model_vars() -> tuple[list[str], np.ndarray, cv2.dnn.Net]:
     Returns:
     - A tuple containing the class names, colors for each class, and the cv2 deep neural network model.
     """
-    with open(str(cf.DATA_PATH / 'model' / 'object_detection_classes_coco.txt'), 'r') as f:
+    with open(str(cf.DATA_PATH / 'model' / 'object_detection_classes_coco.names'), 'r') as f:
         class_names = f.read().split('\n')
 
     colors = np.random.uniform(0, 255, size=(len(class_names), 3))
 
     model = cv2.dnn.readNet(
         model=str(cf.DATA_PATH / 'model' / 'frozen_inference_graph.pb'),
-        config=str(cf.DATA_PATH / 'model' / 'ssd_mobilenet_v2_coco_2018_03_29.pbtxt'),
+        config=str(cf.DATA_PATH / 'model' / 'ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt'),
         framework='TensorFlow'
     )
 
@@ -104,45 +105,3 @@ def __resize_image(image: np.ndarray, scale_factor: float) -> np.ndarray:
 
     resized_image = cv2.resize(image, (new_width, new_height))
     return resized_image
-
-
-def test(loaders: dict, model: cv2.dnn.Net, criterion, use_cuda: bool) -> tuple[float, float]:
-    """
-    Test the trained model on validation and test data.
-
-    Parameters:
-    - loaders: Dictionary containing DataLoader objects with training, validation, and test data.
-    - model: The trained model to be tested.
-    - criterion: Loss function used to evaluate the model.
-    - use_cuda: Boolean flag to indicate if GPU should be used for computations.
-
-    Returns:
-    - A tuple with loss and accuracy of the model.
-    """
-    device = "cuda" if use_cuda and torch.cuda.is_available() else "cpu"
-    model.to(device)
-    model.eval()
-
-    total_loss = 0.0
-    correct_predictions = 0
-    total_samples = 0
-
-    with torch.no_grad():
-        for data in loaders['test']:
-            images, labels = data
-            images, labels = images.to(device), labels.to(device)
-
-            outputs = model(images)
-            loss = criterion(outputs, labels)
-
-            total_loss += loss.item()
-            _, predicted = torch.max(outputs.data, 1)
-            total_samples += labels.size(0)
-            correct_predictions += (predicted == labels).sum().item()
-
-    avg_loss = total_loss / total_samples
-    accuracy = correct_predictions / total_samples * 100
-
-    print(f"Test Loss: {avg_loss:.4f}, Test Accuracy: {accuracy:.2f}%")
-
-    return avg_loss, accuracy
