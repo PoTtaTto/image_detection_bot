@@ -52,8 +52,8 @@ class TestDetectionAccuracy(unittest.IsolatedAsyncioTestCase):
         end_time = time.time()
         total_time = round(end_time - start_time, 2)
 
-        # Print the accuracy and the time taken
-        self.print_accuracy(accuracy, len(img_paths), accuracy, total_time)
+        # # Print the accuracy and the time taken
+        self.print_accuracy(accuracy / len(img_paths), len(img_paths), accuracy, total_time)
 
         # Here we could add assertions based on expected accuracy
         # For example, let's assert we have at least 90% accuracy

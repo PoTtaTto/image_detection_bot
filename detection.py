@@ -57,7 +57,6 @@ async def detect_and_draw_boxes(image_path: Path, scale_factor: float = 1.0, nam
     # Return the annotated image and detected labels
     result_path = cf.DATA_PATH / 'images' / name
     cv2.imwrite(filename=str(result_path), img=image)
-    print(f'Detected {len(detected_labels)} objects.')
     return result_path, detected_labels
 
 
