@@ -41,7 +41,7 @@ async def detect_and_draw_boxes(image_path: Path, scale_factor: float = 1.0, nam
     # Loop through the detections
     for detection in output[0, 0, :, :]:
         confidence = detection[2]
-        if confidence > .4:
+        if confidence > .7:
             class_id = detection[1]
             class_name = class_names[int(class_id) - 1]
             detected_labels.append(class_name)
